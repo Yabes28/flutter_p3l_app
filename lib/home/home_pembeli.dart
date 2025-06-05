@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import '../services/notification_service.dart';
+import '../../services/notification_service.dart';
 
-class HomeHunter extends StatefulWidget {
+class HomePembeli extends StatefulWidget {
+  const HomePembeli({super.key});
+
   @override
-  _HomeHunterState createState() => _HomeHunterState();
+  _HomePembeliState createState() => _HomePembeliState();
 }
 
-class _HomeHunterState extends State<HomeHunter> {
+class _HomePembeliState extends State<HomePembeli> {
   @override
   void initState() {
     super.initState();
@@ -15,24 +17,25 @@ class _HomeHunterState extends State<HomeHunter> {
     // ✅ Minta izin notifikasi (Android 13+)
     FirebaseMessaging.instance.requestPermission();
 
-    // ✅ Cetak token FCM
+    // ✅ Cek token FCM (jika perlu ditampilkan/log)
     FirebaseMessaging.instance.getToken().then((token) {
-      print('📱 [Hunter] Token FCM: $token');
+      print('📱 Token FCM: $token');
     });
 
-    // ✅ Tangani notifikasi saat aplikasi aktif (popup)
+    // ✅ Notifikasi saat app foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('🎯 [Hunter] Pesan Masuk: ${message.notification?.title}');
+      print('🟢 [Pembeli] Notif masuk: ${message.notification?.title}');
       NotificationService.showNotification(
         id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         title: message.notification?.title ?? 'Notifikasi',
-        body: message.notification?.body ?? 'Ada info baru untukmu, Hunter!',
+        body: message.notification?.body ?? 'Ada pesan baru untukmu',
       );
     });
 
-    // ✅ Tangani jika notifikasi dibuka dari background
+    // ✅ Saat notifikasi dibuka dari background
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('📬 Dibuka dari notifikasi: ${message.notification?.title}');
+      // Arahkan ke halaman tertentu jika perlu
     });
   }
 
@@ -40,12 +43,12 @@ class _HomeHunterState extends State<HomeHunter> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Beranda Hunter'),
-        backgroundColor: Colors.deepPurple,
+        title: Text('Beranda Pembeli'),
+        backgroundColor: Colors.green,
       ),
       body: Center(
         child: Text(
-          'Selamat bertugas, Hunter!',
+          'Selamat datang, Pembeli!',
           style: TextStyle(fontSize: 20),
         ),
       ),
@@ -53,9 +56,9 @@ class _HomeHunterState extends State<HomeHunter> {
         onPressed: () {
           Navigator.pushNamed(context, '/profile');
         },
-        child: Icon(Icons.person),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.green,
         tooltip: 'Profil Saya',
+        child: Icon(Icons.person),
       ),
     );
   }

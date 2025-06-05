@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_messaging/firebase_messaging.dart';
-import '../services/notification_service.dart';
+import '../../services/notification_service.dart';
 
 class HomePenitip extends StatefulWidget {
   const HomePenitip({super.key});

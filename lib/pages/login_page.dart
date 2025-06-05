@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
 
-import './services/notification_service.dart';
+import '../services/notification_service.dart';
 
 final storage = FlutterSecureStorage();
 

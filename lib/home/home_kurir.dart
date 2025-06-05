@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import '../services/notification_service.dart';
+import '../../services/notification_service.dart';
 
 class HomeKurir extends StatefulWidget {
+  const HomeKurir({super.key});
+
   @override
   _HomeKurirState createState() => _HomeKurirState();
 }
@@ -54,9 +56,9 @@ class _HomeKurirState extends State<HomeKurir> {
         onPressed: () {
           Navigator.pushNamed(context, '/profile');
         },
-        child: Icon(Icons.person),
         backgroundColor: Colors.orange,
         tooltip: 'Profil Saya',
+        child: Icon(Icons.person),
       ),
     );
   }
