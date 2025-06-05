@@ -5,6 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
 
 import '../services/notification_service.dart';
+import '../pages/navigation/main_bottom_nav.dart';
+
 
 final storage = FlutterSecureStorage();
 
@@ -20,50 +22,65 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   Future<void> loginUser() async {
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/multi-login'),
-      headers: {'Content-Type': 'application/json'},
+  final response = await http.post(
+    Uri.parse('http://10.0.2.2:8000/api/multi-login'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'email': emailController.text,
+      'password': passwordController.text,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+
+    final token = data['access_token'];
+    final role = data['role'];
+    final user = data['user'];
+
+    await storage.write(key: 'token', value: token);
+    await storage.write(key: 'role', value: role);
+    await storage.write(key: 'name', value: user['name'] ?? 'Tidak diketahui');
+    await storage.write(key: 'email', value: user['email'] ?? 'Tidak diketahui');
+    await storage.write(key: 'user_id', value: user['id'].toString());
+
+    // 🔥 Ambil token FCM
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    print('📤 FCM Token: $fcmToken');
+
+    // Kirim token FCM ke backend
+    final tokenResponse = await http.post(
+      Uri.parse('http://10.0.2.2:8000/api/simpan-fcm-token'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
       body: jsonEncode({
-        'email': emailController.text,
-        'password': passwordController.text,
+        'user_id': user['id'],
+        'tipe': role,
+        'token_dikirim': fcmToken,
       }),
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      await storage.write(key: 'token', value: data['access_token']);
-      await storage.write(key: 'role', value: data['role']);
-
-      // FCM token
-      final fcmToken = await FirebaseMessaging.instance.getToken();
-      print('📤 FCM Token: $fcmToken');
-
-      final tokenResponse = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/simpan-fcm-token'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${data['access_token']}',
-        },
-        body: jsonEncode({'fcm_token': fcmToken}),
-      );
-
-      if (tokenResponse.statusCode != 200) {
-        print('❌ Gagal kirim token! Status: ${tokenResponse.statusCode}');
-        print('👉 BODY: ${tokenResponse.body}');
-      } else {
-        print('✅ Token FCM berhasil dikirim.');
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login sukses!')),
-      );
+    if (tokenResponse.statusCode == 200) {
+      print('✅ Token FCM berhasil dikirim.');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login gagal')),
-      );
+      print('❌ Gagal kirim token FCM! Status: ${tokenResponse.statusCode}');
+      print('👉 BODY: ${tokenResponse.body}');
     }
+
+    // ✅ Navigasi ke halaman utama
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => MainBottomNav()),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Login gagal')),
+    );
   }
+}
+
 
   Future<void> testPushNotification() async {
   final token = await storage.read(key: 'token');

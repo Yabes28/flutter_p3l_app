@@ -12,7 +12,7 @@ import '../home/home_pembeli.dart';
 import '../home/home_penitip.dart';
 import '../home/home_kurir.dart';
 import '../home/home_hunter.dart';
-import 'profile_page.dart';
+import 'profile/profile_page.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

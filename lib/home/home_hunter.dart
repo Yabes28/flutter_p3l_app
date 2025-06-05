@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../services/notification_service.dart';
+import '../../models/barang_model.dart';
+import '../../services/barang_service.dart';
 
 class HomeHunter extends StatefulWidget {
   const HomeHunter({super.key});
@@ -10,19 +12,17 @@ class HomeHunter extends StatefulWidget {
 }
 
 class _HomeHunterState extends State<HomeHunter> {
+  late Future<List<Barang>> _barangList;
+
   @override
   void initState() {
     super.initState();
 
-    // ✅ Minta izin notifikasi (Android 13+)
+    // 🔔 FCM: Izin dan Event
     FirebaseMessaging.instance.requestPermission();
-
-    // ✅ Cetak token FCM
     FirebaseMessaging.instance.getToken().then((token) {
       print('📱 [Hunter] Token FCM: $token');
     });
-
-    // ✅ Tangani notifikasi saat aplikasi aktif (popup)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('🎯 [Hunter] Pesan Masuk: ${message.notification?.title}');
       NotificationService.showNotification(
@@ -31,11 +31,12 @@ class _HomeHunterState extends State<HomeHunter> {
         body: message.notification?.body ?? 'Ada info baru untukmu, Hunter!',
       );
     });
-
-    // ✅ Tangani jika notifikasi dibuka dari background
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('📬 Dibuka dari notifikasi: ${message.notification?.title}');
     });
+
+    // 🚚 Fetch Barang
+    _barangList = BarangService.fetchBarangAvailable();
   }
 
   @override
@@ -45,11 +46,53 @@ class _HomeHunterState extends State<HomeHunter> {
         title: Text('Beranda Hunter'),
         backgroundColor: Colors.deepPurple,
       ),
-      body: Center(
-        child: Text(
-          'Selamat bertugas, Hunter!',
-          style: TextStyle(fontSize: 20),
-        ),
+      body: FutureBuilder<List<Barang>>(
+        future: _barangList,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Gagal memuat barang'));
+          }
+
+          final barangs = snapshot.data!;
+          if (barangs.isEmpty) {
+            return Center(child: Text('Belum ada barang aktif.'));
+          }
+
+          return ListView.builder(
+            padding: EdgeInsets.all(12),
+            itemCount: barangs.length,
+            itemBuilder: (context, index) {
+              final barang = barangs[index];
+              return Card(
+                elevation: 2,
+                margin: EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: Image.network(
+                    barang.gambarUrl ?? '',
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Icon(Icons.image_not_supported),
+                  ),
+                  title: Text(barang.namaProduk),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Rp ${barang.harga.toStringAsFixed(0)}'),
+                      Text('Kategori: ${barang.kategori}'),
+                    ],
+                  ),
+                  onTap: () {
+                    // TODO: buka detail barang
+                  },
+                ),
+              );
+            },
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
