@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../auth/auth_service.dart';
-import '../login_page.dart';
+import '../login_page.dart'; // arahkan ke file login-mu yang benar
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -12,33 +11,30 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final storage = FlutterSecureStorage();
-  String name = '', email = '', role = '';
+  String name = '';
+  String email = '';
+  String role = '';
 
   @override
   void initState() {
     super.initState();
-    loadUserData();
+    _loadProfile();
   }
 
-  void loadUserData() async {
-    final name = await storage.read(key: 'name') ?? 'Tidak diketahui';
-    final email = await storage.read(key: 'email') ?? 'Tidak diketahui';
-    final role = await storage.read(key: 'role') ?? 'Tidak diketahui';
+  Future<void> _loadProfile() async {
+    final storedName = await storage.read(key: 'name') ?? '-';
+    final storedEmail = await storage.read(key: 'email') ?? '-';
+    final storedRole = await storage.read(key: 'role') ?? '-';
 
     setState(() {
-      this.name = name;
-      this.email = email;
-      this.role = role;
+      name = storedName;
+      email = storedEmail;
+      role = storedRole.replaceAll('App\\Models\\', '').toUpperCase();
     });
   }
 
-  void handleLogout() async {
-    try {
-      await logoutUser(); // Kirim ke backend untuk hapus token FCM + revoke access token
-    } catch (e) {
-      print('❌ Error saat logout: $e');
-    }
-
+  Future<void> _logout() async {
+    await storage.deleteAll(); // hapus semua data
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => LoginPage()),
@@ -49,34 +45,70 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: Text('Profil Saya'),
-        backgroundColor: Colors.green[700],
+        backgroundColor: Colors.deepPurple,
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: handleLogout,
+            tooltip: 'Keluar',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: Text('Konfirmasi Logout'),
+                  content: Text('Apakah kamu yakin ingin keluar?'),
+                  actions: [
+                    TextButton(
+                      child: Text('Batal'),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                    TextButton(
+                      child: Text('Logout', style: TextStyle(color: Colors.red)),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _logout();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
           )
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Nama: $name', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text('Email: $email', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text('Role: $role', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: handleLogout,
-              icon: Icon(Icons.logout),
-              label: Text('Logout'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            )
-          ],
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.deepPurple,
+                  child: Text(
+                    name.isNotEmpty ? name[0].toUpperCase() : '?',
+                    style: TextStyle(fontSize: 32, color: Colors.white),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(name, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                SizedBox(height: 8),
+                Text(email, style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+                SizedBox(height: 16),
+                Chip(
+                  label: Text('Role: $role'),
+                  backgroundColor: Colors.deepPurple.shade100,
+                  labelStyle: TextStyle(color: Colors.deepPurple[900]),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

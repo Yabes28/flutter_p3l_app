@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import '../../firebase/firebase_options.dart';
+import '../firebase/firebase_options.dart';
 
 // Notifikasi lokal
-import '../services/notification_service.dart';
+import 'services/notification_service.dart';
 
 // Halaman internal
-import 'login_page.dart';
-import '../home/home_pembeli.dart';
-import '../home/home_penitip.dart';
-import '../home/home_kurir.dart';
-import '../home/home_hunter.dart';
-import 'profile/profile_page.dart';
+import 'pages/login_page.dart';
+import 'home/home_pembeli.dart';
+import 'home/home_penitip.dart';
+import 'home/home_kurir.dart';
+import 'home/home_hunter.dart';
+import 'pages/profile/profile_page.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
