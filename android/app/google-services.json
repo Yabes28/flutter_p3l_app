@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "719797557400",
+    "project_id": "reusemart-5c1fc",
+    "storage_bucket": "reusemart-5c1fc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:719797557400:android:b60a260e52edc9ffce18ed",
+        "android_client_info": {
+          "package_name": "com.example.flutter_p3l_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIGuXXC3ozaimp00kTQY9RKuxtJ7DVKpU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
