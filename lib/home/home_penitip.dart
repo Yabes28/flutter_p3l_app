@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_messaging/firebase_messaging.dart';
+
 import '../../services/notification_service.dart';
 
 class HomePenitip extends StatefulWidget {
@@ -18,10 +19,9 @@ class _HomePenitipState extends State<HomePenitip> {
   void initState() {
     super.initState();
 
-    // ✅ Dengarkan notifikasi ketika app dibuka (foreground)
+    // ✅ Listener saat notifikasi masuk (foreground)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('🟢 [HomePenitip] Notif Masuk (foreground): ${message.notification?.title}');
-
+      print('🟢 [HomePenitip] Notif Masuk: ${message.notification?.title}');
       NotificationService.showNotification(
         id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         title: message.notification?.title ?? 'Notifikasi',
@@ -29,10 +29,10 @@ class _HomePenitipState extends State<HomePenitip> {
       );
     });
 
-    // Optional: Tambahkan ini jika ingin respon saat notifikasi di-tap
+    // ✅ Listener saat notifikasi dibuka
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('📬 [HomePenitip] Notif ditekan: ${message.notification?.title}');
-      // Bisa arahkan ke halaman tertentu
+      print('📬 [HomePenitip] Dibuka dari notif: ${message.notification?.title}');
+      // Tambahkan navigasi jika diperlukan
     });
   }
 
@@ -54,9 +54,11 @@ class _HomePenitipState extends State<HomePenitip> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(response.statusCode == 200
-              ? '✅ Notifikasi berhasil dikirim!'
-              : '❌ Gagal kirim notifikasi!'),
+          content: Text(
+            response.statusCode == 200
+                ? '✅ Notifikasi berhasil dikirim!'
+                : '❌ Gagal kirim notifikasi!',
+          ),
         ),
       );
     } catch (e) {
@@ -69,44 +71,35 @@ class _HomePenitipState extends State<HomePenitip> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Beranda Penitip'),
-      ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: Text('Halo Penitip, ini halaman Anda.'),
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 100.0, right: 16.0),
-                child: FloatingActionButton.extended(
-                  onPressed: () => kirimNotifikasiUji(context),
-                  icon: Icon(Icons.notifications_active),
-                  label: Text('Kirim Notifikasi Uji 🔔'),
-                  backgroundColor: Colors.deepOrange,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20.0, right: 16.0),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/profile');
-                  },
-                  child: Icon(Icons.person),
-                ),
-              ),
-            ),
-          ],
+    return Stack(
+      children: [
+        const Center(
+          child: Text(
+            'Halo Penitip, ini halaman Anda.',
+            style: TextStyle(fontSize: 18),
+          ),
         ),
-      ),
+        Positioned(
+          bottom: 86,
+          right: 16,
+          child: FloatingActionButton.extended(
+            onPressed: () => kirimNotifikasiUji(context),
+            icon: const Icon(Icons.notifications_active),
+            label: const Text('Notifikasi Uji 🔔'),
+            backgroundColor: Colors.deepOrange,
+          ),
+        ),
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/profile');
+            },
+            child: const Icon(Icons.person),
+          ),
+        ),
+      ],
     );
   }
 }

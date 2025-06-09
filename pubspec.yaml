@@ -32,8 +32,11 @@ dependencies:
     sdk: flutter
   firebase_core: ^2.25.4
   firebase_messaging: ^14.7.10
-  flutter_local_notifications: 15.1.1
+  flutter_local_notifications: 14.1.1
   shared_preferences: ^2.2.2
+  google_fonts: ^4.0.4
+  carousel_slider: 5.0.0
+
 
 
 

@@ -5,7 +5,11 @@ class Barang {
   final double harga;
   final String kategori;
   final String status;
-  final String? gambarUrl;
+  final String? gambar;
+  final String? gambar2;
+  final String? tglMulai;
+  final String? tglSelesai;
+  final String? garansi;
 
   Barang({
     required this.idProduk,
@@ -14,7 +18,11 @@ class Barang {
     required this.harga,
     required this.kategori,
     required this.status,
-    this.gambarUrl,
+    this.gambar,
+    this.gambar2,
+    this.tglMulai,
+    this.tglSelesai,
+    this.garansi,
   });
 
   factory Barang.fromJson(Map<String, dynamic> json) {
@@ -22,10 +30,14 @@ class Barang {
       idProduk: json['idProduk'],
       namaProduk: json['namaProduk'],
       deskripsi: json['deskripsi'],
-      harga: double.tryParse(json['harga'].toString()) ?? 0.0,
+      harga: double.tryParse(json['harga'].toString()) ?? 0,
       kategori: json['kategori'],
       status: json['status'],
-      gambarUrl: json['gambar_url'],
+      gambar: json['gambar_url'],
+      gambar2: json['gambar2_url'],
+      tglMulai: json['tglMulai'],
+      tglSelesai: json['tglSelesai'],
+      garansi: json['garansi'],
     );
   }
 }
