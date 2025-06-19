@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+//import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'firebase/firebase_options.dart';
 import 'services/notification_service.dart';
 
+import 'pages/splash_page.dart';
 import 'pages/login_page.dart';
 import 'pages/navigation/main_bottom_nav.dart';
+
 import 'home/home_pembeli.dart';
 import 'home/home_penitip.dart';
 import 'home/home_kurir.dart';
 import 'home/home_hunter.dart';
+
 import 'pages/profile/profile_page.dart';
+import 'pages/profile/hunter_profile_page.dart';
+
 import 'pages/DetailBarangPage.dart';
 import 'models/barang_model.dart';
-import '../pages/profile/hunter_profile_page.dart';
-//import '../pages/profile/hunter_history_page.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -43,12 +46,6 @@ void main() async {
 class ReuseMartApp extends StatelessWidget {
   const ReuseMartApp({super.key});
 
-  Future<bool> _isLoggedIn() async {
-    final storage = FlutterSecureStorage();
-    final token = await storage.read(key: 'token');
-    return token != null && token.isNotEmpty;
-  }
-
   Route<dynamic> _errorRoute(String message) {
     return MaterialPageRoute(
       builder: (_) => Scaffold(
@@ -67,20 +64,10 @@ class ReuseMartApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.grey[100],
       ),
-      home: FutureBuilder<bool>(
-        future: _isLoggedIn(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          } else if (snapshot.hasData && snapshot.data == true) {
-            return const MainBottomNav();
-          } else {
-            return const LoginPage();
-          }
-        },
-      ),
+      // 👉 Halaman pertama kini SplashPage
+      home: const SplashPage(),
 
-      // ✅ ONLY use onGenerateRoute if you want to use arguments!
+      // Routing (detail dan lainnya)
       onGenerateRoute: (settings) {
         if (settings.name == '/detail-barang') {
           final args = settings.arguments;
@@ -94,6 +81,8 @@ class ReuseMartApp extends StatelessWidget {
         }
 
         switch (settings.name) {
+          case '/login':
+            return MaterialPageRoute(builder: (_) => const LoginPage());
           case '/homePembeli':
             return MaterialPageRoute(builder: (_) => const HomePembeli());
           case '/homePenitip':
@@ -102,12 +91,12 @@ class ReuseMartApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const HomeKurir());
           case '/homeHunter':
             return MaterialPageRoute(builder: (_) => const HomeHunter());
+          case '/main':
+            return MaterialPageRoute(builder: (_) => const MainBottomNav());
           case '/profile':
             return MaterialPageRoute(builder: (_) => const ProfilePage());
           case '/hunter-profile':
             return MaterialPageRoute(builder: (_) => const HunterProfilePage());
-          //case '/hunter-history':
-            //return MaterialPageRoute(builder: (_) => const HunterHistoryPage());
           default:
             return _errorRoute("Halaman tidak ditemukan");
         }

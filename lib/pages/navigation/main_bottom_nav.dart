@@ -9,8 +9,10 @@ import '../../home/home_penitip.dart';
 
 import '../orders/my_order_page.dart';
 // import '../info/info_page.dart';
-import '../profile/profile_page.dart';
+//import '../profile/profile_page.dart';
 import '../profile/hunter_profile_page.dart';
+import '../profile/pembeli_profile_page.dart';
+import '../profile/penitip_profile_page.dart';
 
 
 class MainBottomNav extends StatefulWidget {
@@ -62,21 +64,30 @@ class _MainBottomNavState extends State<MainBottomNav> {
 
         final List<Widget> pages;
 
-if (role == 'hunter') {
-  pages = [
-    homePage,
-    const MyOrderPage(),
-    const MerchPage(),
-    const HunterProfilePage(), // ✅ Khusus hunter
-  ];
-} else {
-  pages = [
-    homePage,
-    const MyOrderPage(),
-    const MerchPage(),
-    const ProfilePage(), // ✅ Role lain
-  ];
-}
+        if (role == 'hunter') {
+          pages = [
+            homePage,
+            const MyOrderPage(),
+            const MerchPage(),
+            const HunterProfilePage(),
+          ];
+        } else if (role == 'penitip') {
+          pages = [
+            homePage,
+            const MyOrderPage(),
+            const MerchPage(),
+            const PenitipProfilePage(),
+          ];
+        } else {
+          // Default: pembeli atau role lain
+          pages = [
+            homePage,
+            const MyOrderPage(),
+            const MerchPage(),
+            const PembeliProfilePage(),
+          ];
+        }
+
 
         return Scaffold(
           body: pages[_selectedIndex],
